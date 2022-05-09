@@ -161,8 +161,16 @@ LinkedList* combine_linkedlist(LinkedList* ll1, LinkedList* ll2){
 
 LinkedList* quicksort(LinkedList *ll, int compare(void*, void*)){
     int length = length_linkedlist(ll);
-    if(length <= 1)
-        return ll;
+
+    if(length < 1){
+        return init_linkedlist();
+    }
+
+    if(length == 1){
+        LinkedList *sorted = init_linkedlist();
+        append_list(sorted, ll->head->data);
+        return sorted;
+    }
     
     void* inplace = ll->head->data;
     LinkedList *less = init_linkedlist();
@@ -186,13 +194,15 @@ LinkedList* quicksort(LinkedList *ll, int compare(void*, void*)){
 
     free_linkedlist(less);
     free_linkedlist(more);
-    if(lesscpy != less)
-        free_linkedlist(lesscpy);
-    if(morecpy != more)
-        free_linkedlist(morecpy);
+    free_linkedlist(lesscpy);
+    free_linkedlist(morecpy);
     return sorted;
 }
 /*
+int compare(void *ptr1, void *ptr2){
+    return ptr1 - ptr2;
+}
+
 int main(){
     LinkedList *ll = init_linkedlist();
     LinkedList *ll2 = init_linkedlist();

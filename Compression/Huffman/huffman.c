@@ -3,6 +3,8 @@
 #include <string.h>
 #include <math.h>
 
+#include "Compression/Huffman/huffman.h"
+
 #include "DataStructures/BinaryTree/binary_tree.h"
 #include "DataStructures/BitArray/bit_array.h"
 #include "DataStructures/LinkedList/linked_list.h"
@@ -73,16 +75,7 @@ void print_wtree(WeightedLeaf *l){
     }
 }
 
-int main(){
-    char *str;
-    FILE *fp = fopen("message.txt", "r");
-    fseek(fp, 0, SEEK_END);
-    int msglen = ftell(fp);
-    rewind(fp);
-    str = malloc(msglen);
-    fread(str, 1, msglen, fp);
-    
-
+char* huffman_encode(const char *str){
     // count chars in input
     int *count = (int *)calloc(256, sizeof(int));
     for (int i = 0; i < strlen(str); i++)
@@ -114,10 +107,11 @@ int main(){
 
     // build expression tree
     WeightedLeaf *wl1, *wl2;
+    LinkedList *temp;
     while (sorted->head != sorted->tail)
     {
-        wl1 = (WeightedLeaf *)pop_queue(sorted);
-        wl2 = (WeightedLeaf *)pop_queue(sorted);
+        wl1 = (WeightedLeaf*)pop_queue(sorted);
+        wl2 = (WeightedLeaf*)pop_queue(sorted);
 
         wl = init_weightedleaf();
         wl->data = NULL;
@@ -126,7 +120,10 @@ int main(){
         wl->right = wl2;
 
         push_queue(sorted, wl);
-        sorted = quicksort(sorted, compare);
+        //quicksort creates new sorted list
+        temp = quicksort(sorted, compare);
+        free_linkedlist(sorted);
+        sorted = temp;
 
         leaf_count++;
     }
@@ -166,19 +163,28 @@ int main(){
         
         path -= side * pow(10, (int)log10(path));
     }
+    
+    pad_bitarr(encode);
+    write_char_bitarr(encode, '\0');
+    char *ptr = encode->data;
+    free_weighted_tree((WeightedLeaf*)sorted->head->data);
+    free_linkedlist(leaves);
+    free_linkedlist(sorted);
+    free(path_table);
+    free(encode);
+    free(count);
 
-    save_file(encode, "encoded.txt");
-    free_tree((WeightedLeaf*)sorted->head->data);
+    return ptr;
+}
 
-    BitArray *decode = init_bitarr();
-    open_file(decode, "encoded.txt");
+char* huffman_decode(const char *str){
+    BitArray *decode = init_bitarr_string(str);
 
     Leaf *root = init_leaf();
     read_tree_bitarr(decode, root);  
 
     int messagelength = 1;
     char *message = (char *)malloc(sizeof(char));
-
 
     char c;
     do
@@ -204,12 +210,21 @@ int main(){
 
     message[messagelength - 2] = '\0';
 
-    FILE *decodefile = fopen("decoded.txt", "w");
-    fwrite(message, strlen(message), 1, decodefile);
-    fclose(decodefile);
-
-    free(message);
-    free_bitarr(encode);
     free_bitarr(decode);
+    free_tree(root);
+    return message;
+}
+/*
+int main(){
+    const char* str = "";
+    char *encoded = huffman_encode(str);
+    char *decoded = huffman_decode(encoded);
+
+    printf("%d:%s\n", strlen(encoded), encoded);
+    printf("%d:%s\n", strlen(decoded), decoded);
+
+    free(encoded);
+    free(decoded);
     return 0;
 }
+*/

@@ -1,10 +1,21 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "DataStructures/BitArray/bit_array.h"
 
 BitArray* init_bitarr(){
     return (BitArray*)calloc(1, sizeof(BitArray));
+}
+
+BitArray* init_bitarr_string(const char* str){
+    BitArray* ba = (BitArray*)calloc(1, sizeof(BitArray));
+    int n = strlen(str);
+    ba->data = malloc(n);
+    memcpy(ba->data, str, n);
+    ba->bytecount = n;
+    ba->bitcount = n * 8;
+    return ba;
 }
 
 void free_bitarr(BitArray *ba){

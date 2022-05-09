@@ -10,6 +10,7 @@ typedef struct {
 } BitArray;
 
 BitArray* init_bitarr();
+BitArray* init_bitarr_string(const char* str);
 void free_bitarr(BitArray*);
 void write_bitarr(BitArray*, int);
 void write_char_bitarr(BitArray*, unsigned char);

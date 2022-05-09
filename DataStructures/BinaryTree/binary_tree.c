@@ -18,7 +18,17 @@ void free_weightedleaf(WeightedLeaf* l){
     free(l);
 }
 
-void free_tree(WeightedLeaf *l){
+void free_weighted_tree(WeightedLeaf *l){
+    if(l->left)
+        free_weighted_tree(l->left);
+    
+    if(l->right)
+        free_weighted_tree(l->right);
+
+    free_weightedleaf(l);
+}
+
+void free_tree(Leaf *l){
     if(l->left)
         free_tree(l->left);
     
