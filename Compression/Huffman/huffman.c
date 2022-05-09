@@ -216,7 +216,7 @@ char* huffman_decode(const char *str){
 }
 /*
 int main(){
-    const char* str = "";
+    const char* str = "this is the test";
     char *encoded = huffman_encode(str);
     char *decoded = huffman_decode(encoded);
 
