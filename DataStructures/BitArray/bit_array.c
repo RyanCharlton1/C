@@ -8,13 +8,12 @@ BitArray* init_bitarr(){
     return (BitArray*)calloc(1, sizeof(BitArray));
 }
 
-BitArray* init_bitarr_string(const char* str){
+BitArray* init_bitarr_string(const char* str, int len){
     BitArray* ba = (BitArray*)calloc(1, sizeof(BitArray));
-    int n = strlen(str);
-    ba->data = malloc(n);
-    memcpy(ba->data, str, n);
-    ba->bytecount = n;
-    ba->bitcount = n * 8;
+    ba->data = malloc(len);
+    memcpy(ba->data, str, len);
+    ba->bytecount = len;
+    ba->bitcount = len * 8;
     return ba;
 }
 

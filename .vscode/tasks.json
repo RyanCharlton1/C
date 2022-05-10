@@ -14,6 +14,8 @@
 				"${workspaceFolder}/DataStructures/LinkedList/linked_list.c",
 				"${workspaceFolder}/DataStructures/BinaryTree/binary_tree.c",
 				"${workspaceFolder}/DataStructures/BitArray/bit_array.c",
+				"${workspaceFolder}/Compression/Huffman/huffman.c",
+				"${workspaceFolder}/Compression/LZ78/lz78.c",
 				"-o",
 				"${fileDirname}/${fileBasenameNoExtension}",
 				"-lm"

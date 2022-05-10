@@ -31,9 +31,11 @@ void write_tree_bitarr(BitArray *ba, WeightedLeaf *wl){
     }
 }
 
-void create_path_table(unsigned int *table, int path, WeightedLeaf *leaf){
+void create_path_table(unsigned long int *table, unsigned long int path, WeightedLeaf *leaf){
     if(leaf->data){
-        table[(char)leaf->data] = path;
+        char c = (char)leaf->data;
+        printf("%c, ", c);
+        table[c] = path;
     }
     else{
         create_path_table(table, path * 10 + LEFT, leaf->left);
@@ -75,16 +77,33 @@ void print_wtree(WeightedLeaf *l){
     }
 }
 
-char* huffman_encode(const char *str){
-    // count chars in input
-    int *count = (int *)calloc(256, sizeof(int));
-    for (int i = 0; i < strlen(str); i++)
-        count[str[i]]++;
+unsigned long int powi(unsigned long int x, unsigned int pow){
+    if(pow == 0)
+        return 1;
+    else
+        return x * powi(x, pow - 1);
+}
 
+unsigned int log10i(unsigned long int x){
+    unsigned int i = 0;
+    while(x){
+        x /= 10;
+        i++;
+    }
+
+    return i - 1;
+}
+
+char* huffman_encode(const char *str, unsigned long int *len){
+    // count chars in input
+    unsigned long int *count = (unsigned long int*)calloc(256, sizeof(unsigned long int));
+    for (unsigned long int i = 0; i < strlen(str); i++)
+        count[str[i]]++;
+    
     // EOT marker
     count[EOT] = 1;
 
-    int leaf_count = 0;
+    unsigned int leaf_count = 0;
     // create leaves and put them in queue
     LinkedList *leaves = init_linkedlist();
     for (int i = 0; i < 256; i++)
@@ -133,57 +152,59 @@ char* huffman_encode(const char *str){
     write_tree_bitarr(encode, (WeightedLeaf*)sorted->head->data);
 
     //encode str to bit array
-    unsigned int *path_table = calloc(256, sizeof(unsigned int));
+    unsigned long int *path_table = calloc(256, sizeof(unsigned long int));
     create_path_table(path_table, 0, (WeightedLeaf*)sorted->head->data);
 
-    for (int i = 0; i < strlen(str); i++)
+    for (unsigned long int i = 0; i < strlen(str); i++)
     {
-        int path = path_table[str[i]];
+        unsigned long int path = path_table[str[i]];
         while(path){
-            int side = path / pow(10, (int)log10(path));
+            int side = path / powi(10, (unsigned int)log10i(path));
 
             if(side == LEFT)
                 write_bitarr(encode, 0);
             else
                 write_bitarr(encode, 1);
             
-            path -= side * pow(10, (int)log10(path));
+            path -= (unsigned long int)side * powi(10, (int)log10i(path));
         }
     }
 
     // add EOF
-    int path = path_table[EOT];
+    unsigned long int path = path_table[EOT];
     while(path){
-        int side = path / pow(10, (int)log10(path));
+        int side = path / powi(10, (unsigned int)log10i(path));
         
         if(side == LEFT)
             write_bitarr(encode, 0);
         else
             write_bitarr(encode, 1);
         
-        path -= side * pow(10, (int)log10(path));
+        path -= (unsigned long int)side * powi(10, (int)log10i(path));
     }
     
     pad_bitarr(encode);
     write_char_bitarr(encode, '\0');
     char *ptr = encode->data;
+
+    *len = encode->bytecount;
+
     free_weighted_tree((WeightedLeaf*)sorted->head->data);
     free_linkedlist(leaves);
     free_linkedlist(sorted);
     free(path_table);
     free(encode);
     free(count);
-
     return ptr;
 }
 
-char* huffman_decode(const char *str){
-    BitArray *decode = init_bitarr_string(str);
+char* huffman_decode(const char *str, unsigned int *len, unsigned int msglen){
+    BitArray *decode = init_bitarr_string(str, msglen);
 
     Leaf *root = init_leaf();
     read_tree_bitarr(decode, root);  
 
-    int messagelength = 1;
+    unsigned long int messagelength = 1;
     char *message = (char *)malloc(sizeof(char));
 
     char c;
@@ -206,25 +227,13 @@ char* huffman_decode(const char *str){
         message[messagelength - 1] = c;
         messagelength++;
         message = (char *)realloc(message, messagelength * sizeof(char));
-    } while (c != EOT); 
+    } while (c != EOT && decode->bitptr / 8 < decode->bytecount); 
 
     message[messagelength - 2] = '\0';
+
+    *len = messagelength -1;
 
     free_bitarr(decode);
     free_tree(root);
     return message;
 }
-/*
-int main(){
-    const char* str = "this is the test";
-    char *encoded = huffman_encode(str);
-    char *decoded = huffman_decode(encoded);
-
-    printf("%d:%s\n", strlen(encoded), encoded);
-    printf("%d:%s\n", strlen(decoded), decoded);
-
-    free(encoded);
-    free(decoded);
-    return 0;
-}
-*/
