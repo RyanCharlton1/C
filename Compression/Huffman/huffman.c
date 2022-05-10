@@ -34,7 +34,6 @@ void write_tree_bitarr(BitArray *ba, WeightedLeaf *wl){
 void create_path_table(unsigned long int *table, unsigned long int path, WeightedLeaf *leaf){
     if(leaf->data){
         char c = (char)leaf->data;
-        printf("%c, ", c);
         table[c] = path;
     }
     else{
@@ -231,7 +230,7 @@ char* huffman_decode(const char *str, unsigned int *len, unsigned int msglen){
 
     message[messagelength - 2] = '\0';
 
-    *len = messagelength -1;
+    *len = messagelength -2;
 
     free_bitarr(decode);
     free_tree(root);

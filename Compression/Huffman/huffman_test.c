@@ -5,7 +5,7 @@
 
 int main(){
     char* msg;
-    FILE *msgfp = fopen("message.txt", "r");
+    FILE *msgfp = fopen("/home/ryan/Programming/C/Compression/chapter.txt", "r");
     fseek(msgfp, 0, SEEK_END);
     int msglen = ftell(msgfp);
     rewind(msgfp);
