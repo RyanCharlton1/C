@@ -107,7 +107,7 @@ char* lz77_encode(const char* str, int windowbits, int *len){
     *len = msglen;
     return msg;
 }
-
+//returns 
 char* lz77_decode(const unsigned char* str, int windowbits, int len){
     char flagbyte;
     unsigned int windowsize = pow(2, windowbits);
