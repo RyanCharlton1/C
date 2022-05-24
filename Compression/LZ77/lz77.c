@@ -17,7 +17,7 @@ char* lz77_encode(const char* str, int windowbits, int *len){
     unsigned int msglen = 0;
 
     unsigned int windowsize = pow(2, windowbits);
-    unsigned int maxrunlen = pow(2, 16 - windowbits) + 3;
+    unsigned int maxrunlen = pow(2, 16 - windowbits) + 3 - 1;
 
     unsigned int strsize = strlen(str);
     unsigned int strptr = 0;
@@ -40,7 +40,7 @@ char* lz77_encode(const char* str, int windowbits, int *len){
             int rl = 0;
             int j = 0;
             while(str[i + j] == str[strptr + j] && \
-                  j <= maxrunlen && str[i + j] && str[strptr + j])
+                  j < maxrunlen && str[i + j] && str[strptr + j])
                 j++;
 
             if(j > runlen){
@@ -49,7 +49,13 @@ char* lz77_encode(const char* str, int windowbits, int *len){
             }
         }
 
+        runindex -= start;
         if(runlen > 2){
+            int x;
+            if(strptr > 1500)
+                x = strptr;
+
+            x++;
             int c = 0;
             c += runindex << (16 - windowbits);
             c += runlen - 3;
@@ -102,12 +108,12 @@ char* lz77_encode(const char* str, int windowbits, int *len){
     return msg;
 }
 
-char* lz77_decode(const char* str, int windowbits, int len){
+char* lz77_decode(const unsigned char* str, int windowbits, int len){
     char flagbyte;
     unsigned int windowsize = pow(2, windowbits);
     char *msg = NULL;
     unsigned int msglen = 0;
-    int indexlen = 0;
+    
 
     for(int i = 0; i < len; i++){
         if(i % 9 == 0){
@@ -115,6 +121,7 @@ char* lz77_decode(const char* str, int windowbits, int len){
         }else{
             int bit = i % 9 - 1;
             if(flagbyte & 0x1 << bit){
+                unsigned short int indexlen = 0;
                 indexlen += str[i] << 8;
                 i++;
 
