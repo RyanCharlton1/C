@@ -94,10 +94,10 @@ unsigned int log10i(unsigned long int x){
 }
 
 //string must 0 teminated string
-char* huffman_encode(const char *str, unsigned long int *len){
+char* huffman_encode(const char *str, unsigned long int strlen, unsigned long int *len){
     // count chars in input
     unsigned long int *count = (unsigned long int*)calloc(256, sizeof(unsigned long int));
-    for (unsigned long int i = 0; i < strlen(str); i++)
+    for (unsigned long int i = 0; i < strlen; i++)
         count[str[i]]++;
     
     // EOT marker
@@ -155,7 +155,7 @@ char* huffman_encode(const char *str, unsigned long int *len){
     unsigned long int *path_table = calloc(256, sizeof(unsigned long int));
     create_path_table(path_table, 0, (WeightedLeaf*)sorted->head->data);
 
-    for (unsigned long int i = 0; i < strlen(str); i++)
+    for (unsigned long int i = 0; i < strlen; i++)
     {
         unsigned long int path = path_table[str[i]];
         while(path){

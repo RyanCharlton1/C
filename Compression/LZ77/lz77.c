@@ -12,16 +12,15 @@ int pow(int x, int y){
 }
 
 //message must be 0 terminated string
-char* lz77_encode(const char* str, int windowbits, int *len){
+char* lz77_encode(const char* str, int windowbits,int strlen, int *len){
     unsigned char *msg = NULL;
     unsigned int msglen = 0;
 
     unsigned int windowsize = pow(2, windowbits);
     unsigned int maxrunlen = pow(2, 16 - windowbits) + 3 - 1;
 
-    unsigned int strsize = strlen(str);
     unsigned int strptr = 0;
-    while(strptr < strsize){
+    while(strptr < strlen){
         //flag byte
         if(msglen % 9 == 0){
             msglen++;

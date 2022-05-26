@@ -7,7 +7,7 @@
 int main(){
     //hello world
     char* msg;
-    FILE *msgfp = fopen("/home/ryan/Programming/C/Compression/chapter.txt", "r");
+    FILE *msgfp = fopen("/home/ryan/Programming/C/Compression/HuffmanLZ77/huffencode.txt", "r");
     fseek(msgfp, 0, SEEK_END);
     int msglen = ftell(msgfp);
     rewind(msgfp);
@@ -18,7 +18,7 @@ int main(){
 
     //const char *msg = ", Privet Drive, were proud to say that they were perfectly normal, thank you very much. They were the last people youd expect to be involved in anything strange or mysterious, because they just didnt hold with such nonsense.";
     int encodeln;
-    unsigned char *encoded = lz77_encode(msg, 12, &encodeln);
+    unsigned char *encoded = lz77_encode(msg, 12, msglen, &encodeln);
     
     FILE *encodefp = fopen("encoded.txt", "w");
     fwrite(encoded, encodeln, 1, encodefp);
@@ -28,7 +28,7 @@ int main(){
 
 
     FILE *decodefp = fopen("decoded.txt", "w");
-    fwrite(decoded, strlen(decoded), 1, decodefp);
+    fwrite(decoded, msglen, 1, decodefp);
     fclose(decodefp);
 
     free(msg);
