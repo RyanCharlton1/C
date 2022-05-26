@@ -198,7 +198,7 @@ char* huffman_encode(const char *str, unsigned long int *len){
     return ptr;
 }
 
-char* huffman_decode(const char *str, unsigned int *len, unsigned int msglen){
+char* huffman_decode(const char *str, unsigned int msglen){
     BitArray *decode = init_bitarr_string(str, msglen);
 
     Leaf *root = init_leaf();
@@ -230,8 +230,6 @@ char* huffman_decode(const char *str, unsigned int *len, unsigned int msglen){
     } while (c != EOT && decode->bitptr / 8 < decode->bytecount); 
 
     message[messagelength - 2] = '\0';
-
-    *len = messagelength -2;
 
     free_bitarr(decode);
     free_tree(root);
