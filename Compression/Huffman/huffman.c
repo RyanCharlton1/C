@@ -93,6 +93,7 @@ unsigned int log10i(unsigned long int x){
     return i - 1;
 }
 
+//string must 0 teminated string
 char* huffman_encode(const char *str, unsigned long int *len){
     // count chars in input
     unsigned long int *count = (unsigned long int*)calloc(256, sizeof(unsigned long int));
