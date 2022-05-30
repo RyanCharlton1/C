@@ -12,7 +12,7 @@ int pow(int x, int y){
 }
 
 //message must be 0 terminated string
-char* lz77_encode(const char* str, int windowbits,int strlen, int *len){
+char* lz77_encode(const char* str, int windowbits, int strlen, int *len){
     unsigned char *msg = NULL;
     unsigned int msglen = 0;
 

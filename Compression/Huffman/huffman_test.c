@@ -6,7 +6,7 @@
 
 int main(){
     char* msg;
-    FILE *msgfp = fopen("/home/ryan/Programming/C/Compression/chapter.txt", "r");
+    FILE *msgfp = fopen("/home/ryan/Programming/C/Compression/bible.txt", "r");
     fseek(msgfp, 0, SEEK_END);
     int msglen = ftell(msgfp);
     rewind(msgfp);
@@ -15,7 +15,7 @@ int main(){
     fclose(msgfp);
 
     unsigned long encodeln, decodeln;
-    char *encoded = huffman_encode(msg, &encodeln);
+    char *encoded = huffman_encode(msg, msglen, &encodeln);
     
     FILE *encodefp = fopen("encoded.txt", "w");
     fwrite(encoded, encodeln, 1, encodefp);

@@ -12,7 +12,7 @@
 #define EOT 4
 #define LEFT 2
 #define RIGHT 1
-
+#define LEAF (void*)256
 
 int compare(void *n1, void *n2)
 {
@@ -20,7 +20,7 @@ int compare(void *n1, void *n2)
 }
 
 void write_tree_bitarr(BitArray *ba, WeightedLeaf *wl){
-    if(wl->data){
+    if(wl->data != LEAF){
         write_bitarr(ba, 1);
         write_char_bitarr(ba, (char)wl->data);
     }
@@ -32,7 +32,7 @@ void write_tree_bitarr(BitArray *ba, WeightedLeaf *wl){
 }
 
 void create_path_table(unsigned long int *table, unsigned long int path, WeightedLeaf *leaf){
-    if(leaf->data){
+    if(leaf->data != LEAF){
         char c = (char)leaf->data;
         table[c] = path;
     }
@@ -55,7 +55,7 @@ void read_tree_bitarr(BitArray *ba, Leaf *l){
 }
 
 void print_tree(Leaf *l){
-    if(!(l->data)){
+    if(l->data != LEAF){
         print_tree(l->left);
         printf("/A\\");
         print_tree(l->right);
@@ -66,7 +66,7 @@ void print_tree(Leaf *l){
 }
 
 void print_wtree(WeightedLeaf *l){
-    if(!(l->data)){
+    if(l->data != LEAF){
         print_wtree(l->left);
         printf("/%d\\", l->weight);
         print_wtree(l->right);
@@ -133,7 +133,7 @@ char* huffman_encode(const char *str, unsigned long int strlen, unsigned long in
         wl2 = (WeightedLeaf*)pop_queue(sorted);
 
         wl = init_weightedleaf();
-        wl->data = NULL;
+        wl->data = LEAF;
         wl->weight = wl1->weight + wl2->weight;
         wl->left = wl1;
         wl->right = wl2;

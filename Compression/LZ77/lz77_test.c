@@ -7,7 +7,7 @@
 int main(){
     //hello world
     char* msg;
-    FILE *msgfp = fopen("/home/ryan/Programming/C/Compression/HuffmanLZ77/huffencode.txt", "r");
+    FILE *msgfp = fopen("/home/ryan/Programming/C/Compression/bible.txt", "r");
     fseek(msgfp, 0, SEEK_END);
     int msglen = ftell(msgfp);
     rewind(msgfp);
