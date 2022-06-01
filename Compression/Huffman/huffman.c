@@ -9,6 +9,8 @@
 #include "DataStructures/BitArray/bit_array.h"
 #include "DataStructures/LinkedList/linked_list.h"
 
+#include "Maths/ints.h"
+
 #define EOT 4
 #define LEFT 2
 #define RIGHT 1
@@ -74,13 +76,6 @@ void print_wtree(WeightedLeaf *l){
     else{
         printf("%c", l->data);
     }
-}
-
-unsigned long int powi(unsigned long int x, unsigned int pow){
-    if(pow == 0)
-        return 1;
-    else
-        return x * powi(x, pow - 1);
 }
 
 unsigned int log10i(unsigned long int x){

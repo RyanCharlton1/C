@@ -39,7 +39,7 @@ char* lz77_encode(const char* str, int windowbits, int strlen, int *len){
             int rl = 0;
             int j = 0;
             while(str[i + j] == str[strptr + j] && \
-                  j < maxrunlen && str[i + j] && str[strptr + j])
+                  j < maxrunlen && str[strptr + j])
                 j++;
 
             if(j > runlen){

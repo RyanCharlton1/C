@@ -8,7 +8,7 @@ BitArray* init_bitarr(){
     return (BitArray*)calloc(1, sizeof(BitArray));
 }
 
-BitArray* init_bitarr_string(const char* str, int len){
+BitArray* init_bitarr_string(const char* str, unsigned long len){
     BitArray* ba = (BitArray*)calloc(1, sizeof(BitArray));
     ba->data = malloc(len);
     memcpy(ba->data, str, len);
@@ -51,7 +51,9 @@ int read_bitarr(BitArray* ba){
         mask *= 2;
 
     ba->bitptr++;
-    return c & mask;
+    if(c & mask)
+        return 1;
+    return 0;
 }
 
 unsigned char read_char_bitarr(BitArray *ba){
@@ -63,7 +65,7 @@ unsigned char read_char_bitarr(BitArray *ba){
     return c;
 }
 
-void seek_bitarr(BitArray *ba, unsigned int pos){
+void seek_bitarr(BitArray *ba, unsigned long pos){
     ba->bitptr = pos;
 }
 
