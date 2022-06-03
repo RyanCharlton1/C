@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "Compression/RLE/rle.h"
 
 #define KB 1024
 
 int main(){
-    FILE *fp = fopen("C:\\Users\\Ryan\\Desktop\\C\\Compression\\chapter.txt", "r");
+    FILE *fp = fopen("C:\\Users\\Ryan\\Desktop\\C\\Compression\\chapter.txt", "rb+");
     fseek(fp, 0, SEEK_END);
     unsigned long msglen = ftell(fp);
     //unsigned long msglen = 4 * KB;
@@ -33,5 +32,7 @@ int main(){
     fwrite(msg, msglen, 1, fp);
     fclose(fp);
 
+    free(decoded);
+    free(encoded);
     return 0;
 }
