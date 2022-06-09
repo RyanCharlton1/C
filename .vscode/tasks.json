@@ -21,6 +21,7 @@
 				"${workspaceFolder}/Compression/LZ77/lz77.c",
 				"${workspaceFolder}/Compression/LZMA/lzma.c",
 				"${workspaceFolder}/Compression/RLE/rle.c",
+				"${workspaceFolder}/Compression/BWT/bwt.c",
 				"-o",
 				"${fileDirname}/${fileBasenameNoExtension}.o",
 				"-lm"

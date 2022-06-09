@@ -3,21 +3,15 @@
 
 
 #include "lz77.h"
-
-int pow(int x, int y){
-    if(y == 0)
-        return 1;
-
-    return x * pow(x, y - 1);
-}
+#include "Maths/ints.h"
 
 //message must be 0 terminated string
 char* lz77_encode(const char* str, int windowbits, int strlen, int *len){
     unsigned char *msg = NULL;
     unsigned int msglen = 0;
 
-    unsigned int windowsize = pow(2, windowbits);
-    unsigned int maxrunlen = pow(2, 16 - windowbits) + 3 - 1;
+    unsigned int windowsize = powi(2, windowbits);
+    unsigned int maxrunlen = powi(2, 16 - windowbits) + 3 - 1;
 
     unsigned int strptr = 0;
     while(strptr < strlen){
@@ -109,7 +103,7 @@ char* lz77_encode(const char* str, int windowbits, int strlen, int *len){
 //returns 
 char* lz77_decode(const unsigned char* str, int windowbits, int len){
     char flagbyte;
-    unsigned int windowsize = pow(2, windowbits);
+    unsigned int windowsize = powi(2, windowbits);
     char *msg = NULL;
     unsigned int msglen = 0;
     
@@ -131,7 +125,7 @@ char* lz77_decode(const unsigned char* str, int windowbits, int len){
 
                 indexlen += str[i];
                 int runindex = indexlen >> (16 - windowbits);
-                int runlen = indexlen % pow(2, 16 - windowbits) + 3;
+                int runlen = indexlen % powi(2, 16 - windowbits) + 3;
                 
                 int msgptr = msglen - windowsize;
                 if(msgptr < 0)

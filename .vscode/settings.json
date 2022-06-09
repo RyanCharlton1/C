@@ -3,6 +3,7 @@
         "type_traits": "cpp",
         "linked_list.h": "c",
         "cmath": "c",
-        "*.tcc": "c"
+        "*.tcc": "c",
+        "suffix_array.h": "c"
     }
 }

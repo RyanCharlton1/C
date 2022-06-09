@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "DataStructures/SuffixArray/suffix_array.h"
@@ -18,9 +19,21 @@ void free_suffixarr(SuffixArray *sa){
     free(sa);
 }
 
+void print_suffixarr_int(SuffixArray *sa){
+    for(int i = 0; i < sa->size; i++)
+        printf("%d ", sa->indices[i]);
+    putchar('\n');
+}
+
+void print_suffixarr_char(SuffixArray *sa){
+    for(int i = 0; i < sa->size; i++)
+        printf("%c ", sa->str[sa->indices[i]]);
+    putchar('\n');
+}
+
 //returns 1 if x is greater than y 0 otherwise
-int compare_cycles(const unsigned char* str, unsigned int strlen, unsigned int x, unsigned int y){
-    if(x != y)
+int compare_cycles_suff(const unsigned char* str, unsigned int strlen, unsigned int x, unsigned int y){
+    if(x == y)
         return 0;
         
     for(unsigned int i = 0; i < strlen; i++){
@@ -36,9 +49,8 @@ void bwt_encode_suffixarr(SuffixArray *sa){
     for(unsigned int i = 0; i < sa->size; i++){
         place = 0;
         for(unsigned int j = 0; j < sa->size; j++){
-            
-                place += compare_cycles(sa->str, sa->size, i, j);
+            place += compare_cycles_suff(sa->str, sa->size, i, j);
         }
-         sa->indices[place] = i;
+        sa->indices[place] = i;
     }
 }
