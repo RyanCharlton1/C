@@ -1,4 +1,4 @@
-##Compression
+# Compression
 Comressed all harry potter books to 43%
 original - 455419
 lz77 - 240835
