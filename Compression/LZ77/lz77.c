@@ -6,7 +6,7 @@
 #include "Maths/ints.h"
 
 //message must be 0 terminated string
-char* lz77_encode(const char* str, int windowbits, int strlen, int *len){
+char* lz77_encode(const char* str, int windowbits, unsigned int strlen, unsigned int *len){
     unsigned char *msg = NULL;
     unsigned int msglen = 0;
 
@@ -101,14 +101,14 @@ char* lz77_encode(const char* str, int windowbits, int strlen, int *len){
     return msg;
 }
 //returns 
-char* lz77_decode(const unsigned char* str, int windowbits, int len){
+char* lz77_decode(const unsigned char* str, int windowbits, unsigned int strlen, unsigned int *len){
     char flagbyte;
     unsigned int windowsize = powi(2, windowbits);
     char *msg = NULL;
     unsigned int msglen = 0;
     
 
-    for(int i = 0; i < len; i++){
+    for(int i = 0; i < strlen; i++){
         if(i % 9 == 0){
             flagbyte = str[i];
         }else{
@@ -144,9 +144,6 @@ char* lz77_decode(const unsigned char* str, int windowbits, int len){
         }
     }
 
-    msglen++;
-    msg = realloc(msg, msglen * sizeof(char));
-    msg[msglen - 1] = '\0';
-
+    *len = msglen;
     return msg;
 }

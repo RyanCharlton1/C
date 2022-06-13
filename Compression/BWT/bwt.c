@@ -5,13 +5,14 @@
 
 //returns 1 if x is greater than y 0 otherwise
 int compare_cycles(const unsigned char* str, unsigned int strlen, unsigned int x, unsigned int y){
-    for(unsigned int i = 0; i < strlen; i++){
+    for(unsigned int i = 0; i < strlen + 1; i++){
         if(str[(x + i) % strlen] > str[(y + i) % strlen])
             return 1;
         if(str[(x + i) % strlen] < str[(y + i) % strlen])
             return 0;
     }
 }
+//must give string ending in \255
 //find each cycles order then puts cycles final char in encoded
 char *bwt_encode(const unsigned char *str, unsigned int strlen){
     char *encoded = malloc(strlen + 1);

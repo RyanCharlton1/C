@@ -4,6 +4,8 @@
         "linked_list.h": "c",
         "cmath": "c",
         "*.tcc": "c",
-        "suffix_array.h": "c"
+        "suffix_array.h": "c",
+        "bwt.h": "c",
+        "mtf.h": "c"
     }
 }

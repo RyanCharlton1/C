@@ -6,10 +6,16 @@
 #define KiB 1024
 
 int main(){
-    char test[13] = "IPSSM\255PISSII";
-    bwt_decode(test, 13);
-    char * encoeded = bwt_encode(test, 12);
+    char test[9] = "^BANANA\255";
+    char * encoded = bwt_encode(test, 8);
+    for(int i = 0; i < 9; i++)
+        printf("%c, ", encoded[i]);
+    putchar('\n');
+    bwt_decode(encoded, 9);
     char* msg;
+    for(int i = 0; i < 8; i++)
+        printf("%c, ", encoded[i]);
+    putchar('\n');
     
     /*FILE *msgfp = fopen("/home/ryan/Programming/C/Compression/chapter.txt", "r");
     fseek(msgfp, 0, SEEK_END);
