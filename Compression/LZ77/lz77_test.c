@@ -7,7 +7,7 @@
 int main(){
     //hello world
     char* msg;
-    FILE *msgfp = fopen("/home/ryan/Programming/C/Compression/bible.txt", "r");
+    FILE *msgfp = fopen("/home/ryan/Programming/C/Compression/MTF/encoded.txt", "r");
     fseek(msgfp, 0, SEEK_END);
     int msglen = ftell(msgfp);
     rewind(msgfp);
@@ -23,8 +23,8 @@ int main(){
     FILE *encodefp = fopen("encoded.txt", "w");
     fwrite(encoded, encodeln, 1, encodefp);
     fclose(encodefp);
-
-    char *decoded = lz77_decode(encoded, 12, encodeln);
+    unsigned int *decodelen;
+    char *decoded = lz77_decode(encoded, 12, encodeln, &decodelen);
 
 
     FILE *decodefp = fopen("decoded.txt", "w");

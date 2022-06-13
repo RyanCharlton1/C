@@ -4,7 +4,7 @@
 #include "Compression/MTF/mtf.h"
 
 int main(){
-    FILE *msgfp = fopen("/home/ryan/Programming/C/Compression/chapter.txt", "r");
+    FILE *msgfp = fopen("/home/ryan/Programming/C/Testing/encoded.txt", "r");
     fseek(msgfp, 0, SEEK_END);
     unsigned int msglen = ftell(msgfp);
     rewind(msgfp);

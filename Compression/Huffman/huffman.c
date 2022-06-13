@@ -189,7 +189,6 @@ char* huffman_encode(const char *str, unsigned long int strlen, unsigned long in
     free_linkedlist(sorted);
     free(path_table);
     free(encode);
-    free(count);
     return ptr;
 }
 
