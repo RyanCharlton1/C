@@ -7,8 +7,8 @@ mtf - 240836\
 lz77 - 270030\
 huffman - 197927
 
-TODO
-complete png and bmp file opening using zlib because i made bzip instead of deflate
-encryption algorithms
-search algorithms
+TODO\
+complete png and bmp file opening using zlib because i made bzip instead of deflate\
+encryption algorithms\
+search algorithms\
 ai?
