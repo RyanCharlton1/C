@@ -6,7 +6,7 @@
 
 int main(){
     char* msg;
-    FILE *msgfp = fopen("/home/ryan/Programming/C/Compression/LZ77/encoded.txt", "r");
+    FILE *msgfp = fopen("/home/ryan/Programming/C/Compression/MTF/encoded.txt", "r");
     fseek(msgfp, 0, SEEK_END);
     int msglen = ftell(msgfp);
     rewind(msgfp);

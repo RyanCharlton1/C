@@ -23,6 +23,7 @@
 				"${workspaceFolder}/Compression/RLE/rle.c",
 				"${workspaceFolder}/Compression/BWT/bwt.c",
 				"${workspaceFolder}/Compression/MTF/mtf.c",
+				"${workspaceFolder}/ECC/CRC/crc.c",
 				"-o",
 				"${fileDirname}/${fileBasenameNoExtension}.o",
 				"-lm"
