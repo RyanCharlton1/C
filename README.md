@@ -11,4 +11,5 @@ TODO\
 complete png and bmp file opening using zlib because i made bzip instead of deflate\
 encryption algorithms\
 search algorithms\
+CRC and other ECC\
 ai?
