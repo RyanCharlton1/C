@@ -6,6 +6,8 @@
         "*.tcc": "c",
         "suffix_array.h": "c",
         "bwt.h": "c",
-        "mtf.h": "c"
+        "mtf.h": "c",
+        "compare": "c",
+        "limits": "c"
     }
 }

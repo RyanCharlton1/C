@@ -25,7 +25,8 @@
 				"${workspaceFolder}/Compression/MTF/mtf.c",
 				"-o",
 				"${fileDirname}/${fileBasenameNoExtension}.o",
-				"-lm"
+				"-lm",
+				"-w"
 			],
 			"options": {
 				"cwd": "${fileDirname}"
