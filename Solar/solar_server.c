@@ -18,7 +18,6 @@
 
 #define BUFFERSIZE 512
 #define SSPORT 1234
-#define MAXCONNECTIONS 8
 #define MAXCLIENTS 8
 
 #define SEC 1000
@@ -33,12 +32,54 @@ void print_error(){
     printf("%d:%s\n", errno, strerror(errno));
 }
 
+typedef struct{
+    int socket_id;
+    Planet *planets;
+    //client num will be used to index arrays
+    int client_num;
+} client_thread_arg;
+
+void client_thread(client_thread_arg *args){
+    char buffer[32];
+    printf("reading socket %d\n", args->socket_id);
+    int close_socket = FALSE;
+
+    do
+    {
+        //read all data until ewouldblock
+        //any other error will close socket
+        int len  = recv(args->socket_id, buffer, sizeof(buffer), 0);
+        int dummy = 10;
+        if(len < 0){
+            if(errno != EWOULDBLOCK){
+                printf("recv failed\n");
+                close_socket = TRUE;
+            }
+            break;
+        }
+        //connection closed by client
+        if(len == 0){
+            printf("closed socket %d\n", args->socket_id);
+            close_socket = TRUE;
+            break;
+        }
+        printf("socket %d : %s\n", args->socket_id, buffer);
+    } while(!QUIT);
+    
+    close(args->socket_id);
+    //clean up all connections accociated data
+    free(args); 
+    pthread_detach(pthread_self());
+}
+
+
 //master socket thread to establish new connections
 void master_socket_thread(){
-    int master_socket, new_socket, socket_count = 1;
+    int master_socket, new_socket;
     struct sockaddr_in address;
-    struct pollfd socket_set[1 + MAXCLIENTS];
-    char buffer[32];
+    int client_count = 0;
+    pthread_t *client_threads = NULL;
+    int *retvals = NULL;
 
     //master socket to listen for incoming connections
     if((master_socket = socket(PF_INET, SOCK_STREAM, 0)) == 0){
@@ -86,109 +127,45 @@ void master_socket_thread(){
         exit(EXIT_FAILURE);
     }
 
-    memset(socket_set, 0, sizeof(socket_set));
-    //set master socket as socket 0 to listen on
-    socket_set[0].fd = master_socket;
-    socket_set[0].events = POLLIN;
-
     int address_size = sizeof(address);
     printf("waiting for connections...\n");
 
     //loop listening and accepting connections until quit
+    struct sockaddr *client_info;
     while(!QUIT){
-        //wait until 
-        if(poll(socket_set, socket_count, 2 * MIN) <= 0){
-            printf("master socket poll failed\n");
-            print_error();
-            exit(EXIT_FAILURE);
+        //client_info = malloc(sizeof(struct sockaddr));
+        new_socket = accept(master_socket, NULL, NULL);
+
+        if(new_socket < 0){
+            //if fails with ewouldblock all connections have been accepted
+            //otherwise stop server
+            if(errno != EWOULDBLOCK){
+                printf("accept failed\n");
+                QUIT = TRUE;
+            }
+            //print_error();
+            continue;
         }
 
-        int current_socket_count = socket_count;
-        for(int i = 0; i < current_socket_count; i++){
-            
-            //skip if no events
-            if(socket_set[i].revents == 0)
-                continue;
+        printf("new connection %d\n", new_socket);
 
-            //quit if event was not POLLIN
-            if(socket_set[i].revents != POLLIN){
-                printf("ERROR! revents %d\n", socket_set[i].revents);
-                    QUIT = TRUE;
-                    break;
-            }
+        client_thread_arg *args = malloc(sizeof(client_thread_arg));
+        args->client_num = client_count;
+        args->socket_id = new_socket;
 
-            if(socket_set[i].fd == master_socket){
-                printf("reading master socket\n");
-
-                //accept all incoming connections
-                do{
-                    new_socket = accept(master_socket, NULL, NULL);
-                    if(new_socket < 0){
-                        //if fails with ewouldblock all connections have been accepted
-                        //otherwise stop server
-                        if(errno != EWOULDBLOCK){
-                            printf("accept failed\n");
-                            QUIT = TRUE;
-                        }
-                        break;
-                    }
-
-                    //add new socket to socket_set
-                    printf("new connection %d\n", new_socket);
-                    socket_set[socket_count].fd = new_socket;
-                    socket_set[socket_count].events = POLLIN;
-                    socket_count++;
-
-                } while(new_socket != -1);
-            }
-            //if not master socket read client socket
-            else{
-                printf("reading socket %d\n", socket_set[i].fd);
-                int close_socket = FALSE;
-
-                //do
-                //{
-                    //read all data until ewouldblock
-                    //any other error will close socket
-                    int len  = recv(socket_set[i].fd, buffer, sizeof(buffer), 0);
-                    int dummy = 10;
-                    if(len < 0){
-                        if(errno != EWOULDBLOCK){
-                            printf("recv failed\n");
-                            close_socket = TRUE;
-                        }
-                        break;
-                    }
-
-                    //connection closed by client
-                    if(len == 0){
-                        printf("closed socket %d\n", socket_set[i].fd);
-                        close_socket = TRUE;
-                        break;
-                    }
-
-                    printf("socket %d : %s\n", socket_set[i].fd, buffer);
-                //} while(TRUE);
-                
-                close(socket_set[i].fd);
-                socket_set[i].fd = -1;
-                for(int i = 0; i < socket_count; i++){
-                    if(socket_set[i].fd == -1){
-                        for(int j = i; j < socket_count - 1; j++)
-                            socket_set[j].fd = socket_set[j + 1].fd;
-
-                        i--;
-                        socket_count--;
-                    }
-                }
-            }
-
-        }
+        client_count++;
+        client_threads = realloc(client_threads, client_count * sizeof(pthread_t));
+        retvals = realloc(retvals, client_count * sizeof(int));
+        retvals[client_count] = pthread_create(&client_threads[client_count - 1], NULL, client_thread, args);
     }
 
-    for(int i = 0; i < socket_count; i++)
-        if(socket_set[i].fd >= 0)
-            close(socket_set[i].fd);
+    for(int i = 0; i < client_count; i++)
+        pthread_join(client_threads[i], NULL);
+
+    pthread_detach(pthread_self());
+    close(master_socket);
+    free(retvals);
+    free(client_threads);
 }
 
 int main(int argc, char** argv){
