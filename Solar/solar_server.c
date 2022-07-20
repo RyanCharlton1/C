@@ -29,6 +29,10 @@
 
 int QUIT = 0;
 
+void print_error(){
+    printf("%d:%s\n", errno, strerror(errno));
+}
+
 //master socket thread to establish new connections
 void master_socket_thread(){
     int master_socket, new_socket, socket_count = 1;
@@ -39,6 +43,7 @@ void master_socket_thread(){
     //master socket to listen for incoming connections
     if((master_socket = socket(PF_INET, SOCK_STREAM, 0)) == 0){
         printf("master socket create failed\n");
+        print_error();
         exit(EXIT_FAILURE);
     }
 
@@ -46,12 +51,14 @@ void master_socket_thread(){
     int opt = TRUE;
     if(setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0){
         printf("master socket option failed\n");
+        print_error();
         close(master_socket);
         exit(EXIT_FAILURE);
     }
     
     if(ioctl(master_socket, FIONBIO, (char*)&opt, sizeof(opt)) < 0){
         printf("master socket could not be set to nonblocking\n");
+        print_error();
         close(master_socket);
         exit(EXIT_FAILURE);
     }
@@ -59,11 +66,12 @@ void master_socket_thread(){
     //create address struct for master socket
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_family = htons(SSPORT);
+    address.sin_port = htons(SSPORT);
 
     //bind master socket to address struct
     if(bind(master_socket, (struct sockaddr*)&address, sizeof(address)) < 0){
         printf("master socket bind failed\n");
+        print_error();
         close(master_socket);
         exit(EXIT_FAILURE);
     }
@@ -72,7 +80,8 @@ void master_socket_thread(){
 
     //sets socket to listen for new connections
     if(listen(master_socket, MAXCLIENTS) < 0){
-        pritnf("master socket listen failed");
+        printf("master socket listen failed");
+        print_error();
         close(master_socket);
         exit(EXIT_FAILURE);
     }
@@ -89,7 +98,8 @@ void master_socket_thread(){
     while(!QUIT){
         //wait until 
         if(poll(socket_set, socket_count, 2 * MIN) <= 0){
-            pritnf("master socket poll failed\n");
+            printf("master socket poll failed\n");
+            print_error();
             exit(EXIT_FAILURE);
         }
 
@@ -136,11 +146,12 @@ void master_socket_thread(){
                 printf("reading socket %d\n", socket_set[i].fd);
                 int close_socket = FALSE;
 
-                do
-                {
+                //do
+                //{
                     //read all data until ewouldblock
                     //any other error will close socket
                     int len  = recv(socket_set[i].fd, buffer, sizeof(buffer), 0);
+                    int dummy = 10;
                     if(len < 0){
                         if(errno != EWOULDBLOCK){
                             printf("recv failed\n");
@@ -157,7 +168,7 @@ void master_socket_thread(){
                     }
 
                     printf("socket %d : %s\n", socket_set[i].fd, buffer);
-                } while(TRUE);
+                //} while(TRUE);
                 
                 close(socket_set[i].fd);
                 socket_set[i].fd = -1;
@@ -181,15 +192,15 @@ void master_socket_thread(){
 }
 
 int main(int argc, char** argv){
-    pthread_t *listener;
-    pthread_create(listener, NULL, master_socket_thread, NULL);
+    pthread_t listener = NULL;
+    int error_code = pthread_create(&listener, NULL, master_socket_thread, NULL);
     while(!QUIT){
         if(getchar() == 'q')
             QUIT = TRUE;
     }
 
     ////wait for listener thread to close 
-    //pthread_join(listener, NULL);
+    pthread_join(listener, NULL);
     //for(int i = 0;i < MAXCLIENTS; i++)
     //    if(client_socket[i])
     //        close(client_socket[i]);
