@@ -1,12 +1,12 @@
 #ifndef PLANETRYAN
 #define PLANETRYAN
 
-#include "Maths/vec4.h"
+#include "Maths/vec3.h"
 
 typedef struct{
     const char *name;
-    Vec4 pos;
-    Vec4 forward;
+    Vec3 pos;
+    Vec3 forward;
     double vel;
     double mass;
 } Planet;

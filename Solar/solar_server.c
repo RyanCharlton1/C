@@ -42,7 +42,8 @@ typedef struct{
 void client_thread(client_thread_arg *args){
     char buffer[32];
     printf("reading socket %d\n", args->socket_id);
-    int close_socket = FALSE;
+
+
 
     do
     {
@@ -51,16 +52,14 @@ void client_thread(client_thread_arg *args){
         int len  = recv(args->socket_id, buffer, sizeof(buffer), 0);
         int dummy = 10;
         if(len < 0){
-            if(errno != EWOULDBLOCK){
+            if(errno != EWOULDBLOCK)
                 printf("recv failed\n");
-                close_socket = TRUE;
-            }
+
             break;
         }
         //connection closed by client
         if(len == 0){
             printf("closed socket %d\n", args->socket_id);
-            close_socket = TRUE;
             break;
         }
         printf("socket %d : %s\n", args->socket_id, buffer);
@@ -178,9 +177,6 @@ int main(int argc, char** argv){
 
     ////wait for listener thread to close 
     pthread_join(listener, NULL);
-    //for(int i = 0;i < MAXCLIENTS; i++)
-    //    if(client_socket[i])
-    //        close(client_socket[i]);
 
     return 0;
 }
