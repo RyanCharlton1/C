@@ -8,6 +8,7 @@
         "bwt.h": "c",
         "mtf.h": "c",
         "compare": "c",
-        "limits": "c"
+        "limits": "c",
+        "glad.h": "c"
     }
 }

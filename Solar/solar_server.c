@@ -13,12 +13,14 @@
 #include <poll.h>
 #include <pthread.h>
 
+#include "Maths/vec3.h"
 #include "Maths/vec4.h"
 #include "Solar/planet.h"
 
 #define BUFFERSIZE 512
 #define SSPORT 1234
 #define MAXCLIENTS 8
+#define SERVERPLANETS 1
 
 #define SEC 1000
 #define MIN 60 * SEC
@@ -27,6 +29,11 @@
 #define FALSE 0
 
 int QUIT = 0;
+
+Planet *client_planets[MAXCLIENTS];
+Planet *server_planets[SERVERPLANETS];
+
+
 
 void print_error(){
     printf("%d:%s\n", errno, strerror(errno));
@@ -70,7 +77,6 @@ void client_thread(client_thread_arg *args){
     free(args); 
     pthread_detach(pthread_self());
 }
-
 
 //master socket thread to establish new connections
 void master_socket_thread(){
@@ -168,6 +174,28 @@ void master_socket_thread(){
 }
 
 int main(int argc, char** argv){
+    for(int i = 0; i < MAXCLIENTS; i++)
+        client_planets[i] = NULL;
+
+    Vec3 origin;
+    origin.x = 0.0;
+    origin.y = 0.0;
+    origin.z = 0.0;
+
+    Vec3 oglforward;
+    oglforward.x = 0.0;
+    oglforward.y = 0.0;
+    oglforward.z = 0.0;
+
+    Planet sun;
+    sun.name = NULL;
+    sun.pos = origin;
+    sun.forward = oglforward;
+    sun.vel = 0.0;
+    sun.mass = 1.989e30;
+
+    server_planets[0] = &sun;
+
     pthread_t listener = NULL;
     int error_code = pthread_create(&listener, NULL, master_socket_thread, NULL);
     while(!QUIT){

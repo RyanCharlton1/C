@@ -739,3 +739,70 @@ main (int argc, char *argv[])
 
 
 
+//
+//  MultiQuoteClient
+//
+//  Created by <insert name> 
+//  Username: <inser username>
+//
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+#include <pthread.h>
+#include <sys/socket.h>
+
+#define kMULTIQUOTEPORT 1818
+#define QOUTEBUFFER 256
+
+int main(int argc, const char * argv[])
+{
+    char qoute[QOUTEBUFFER], message[16];
+    int s; 
+    int i;
+
+    struct sockaddr_in server;
+    memset(&server, 0, sizeof(server));
+    server.sin_family = AF_INET;
+    server.sin_port = htons(kMULTIQUOTEPORT);
+    server.sin_addr.s_addr = INADDR_ANY;
+    struct hostent *ptrh;
+    ptrh = gethostbyname(argv[1]);
+    memcpy(&server.sin_addr, ptrh->h_addr, ptrh->h_length);
+
+    s = socket(PF_INET,SOCK_STREAM, IPPROTO_TCP);
+    if (s == -1){
+        printf("socket failed!!\n");
+        return -1;
+    }
+    
+    if (connect(s, (struct sockaddr*)&server, sizeof(server)) < 0){
+        printf("failed to connect\n");
+        return -1;
+    }
+    char *c;
+    int n = strtol(argv[2], &c, 10);
+    
+    read(s, qoute, QOUTEBUFFER);
+    
+    printf("%s\n", qoute);
+    int j;
+    for (j = 0; j < QOUTEBUFFER; j++)
+        qoute[j] = 0;
+    for (i = 1; i < n; i++){
+        write(s, "ANOTHER\r\n", sizeof("ANOTHER\r\n"));
+        read(s, qoute, QOUTEBUFFER);
+        printf("%s\n", qoute);
+        for (j = 0; j < QOUTEBUFFER; j++)
+            qoute[j] = 0;
+    }
+    write(s, "EXIT\r\n", sizeof("EXIT\r\n"));
+    close(s);
+    return 0;
+}
