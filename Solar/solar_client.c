@@ -13,7 +13,7 @@
 #include <poll.h>
 #include <pthread.h>
 
-#include <glad/include/glad/glad.h>
+#include <glad/include/glad/gl.h>
 #include <GLFW/glfw3.h>
 
 #include "Solar/planet.h"
@@ -24,6 +24,16 @@ int QUIT = FALSE;
 Planet client_planets[MAXCLIENTS];
 Planet server_planets[SERVERPLANETS];
 int player_index;
+
+void print_client_planets(){
+    for(int i = 0; i < MAXCLIENTS; i++)
+        printf("client_planets[%d]:%s\n", i, client_planets[i].name);
+}
+
+void print_server_planets(){
+    for(int i = 0; i < SERVERPLANETS; i++)
+        printf("server_planets[%d]:%s\n", i, server_planets[i].name);
+}
 
 void print_error(){
     printf("%d:%s\n", errno, strerror(errno));
@@ -62,11 +72,11 @@ void server_connection_thread(char name[NAMEMAX]){
     //receive client planets
     recv(server_socket, client_planets, sizeof(client_planets), 0);
     //receive index for which planet is players
-    recv(server_socket, player_index, sizeof(player_index), 0);
+    recv(server_socket, &player_index, sizeof(player_index), 0);
     //loop sending player planet and recieving other clients and server data
     int len;
     while(!QUIT){
-        send(server_socket, &client_planets[player_index], sizeof(Planet), 0);
+        write(server_socket, &client_planets[player_index], sizeof(Planet));
         
         len = recv(server_socket, &client_planets, sizeof(client_planets), 0);
         if(len < 0){
@@ -87,8 +97,13 @@ void server_connection_thread(char name[NAMEMAX]){
             printf("server closed connection\n");
             break;
         }
+
+        printf("\033[H\033[J");
+        print_client_planets();
+        print_server_planets();
     }
 
+    
     close(server_socket);  
     pthread_detach(pthread_self());
 }
@@ -102,7 +117,7 @@ int main(int argc, char **argv){
     
     
 
-    QUIT = TRUE;
+    //QUIT = TRUE;
     pthread_join(server_connection, NULL);
     return 0;
 }

@@ -78,7 +78,7 @@ void client_thread(client_thread_arg *args){
     //send client planets
     write(args->socket_id, client_planets, sizeof(client_planets));
     //send which planet is the players
-    send(args->socket_id, index, sizeof(index), 0);
+    write(args->socket_id, &index, sizeof(index));
     int len;
     do
     {
@@ -94,8 +94,8 @@ void client_thread(client_thread_arg *args){
             break;
         }
 
-        send(args->socket_id, &client_planets, sizeof(client_planets), 0);
-        send(args->socket_id, &server_planets, sizeof(server_planets), 0);
+        write(args->socket_id, &client_planets, sizeof(client_planets));
+        write(args->socket_id, &server_planets, sizeof(server_planets));
     } while(!QUIT);
     
     close(args->socket_id);

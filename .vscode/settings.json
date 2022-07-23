@@ -10,6 +10,7 @@
         "compare": "c",
         "limits": "c",
         "glad.h": "c",
-        "glfw3.h": "c"
+        "glfw3.h": "c",
+        "planet.h": "c"
     }
 }
