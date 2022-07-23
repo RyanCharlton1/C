@@ -9,6 +9,7 @@
         "mtf.h": "c",
         "compare": "c",
         "limits": "c",
-        "glad.h": "c"
+        "glad.h": "c",
+        "glfw3.h": "c"
     }
 }

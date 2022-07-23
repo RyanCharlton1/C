@@ -16,27 +16,39 @@
 #include "Maths/vec3.h"
 #include "Maths/vec4.h"
 #include "Solar/planet.h"
+#include "Solar/solar.h"
 
-#define BUFFERSIZE 512
-#define SSPORT 1234
-#define MAXCLIENTS 8
-#define SERVERPLANETS 1
-
-#define SEC 1000
-#define MIN 60 * SEC
-
-#define TRUE 1
-#define FALSE 0
 
 int QUIT = 0;
 
-Planet *client_planets[MAXCLIENTS];
-Planet *server_planets[SERVERPLANETS];
-
-
+Planet client_planets[MAXCLIENTS];
+Planet server_planets[SERVERPLANETS];
 
 void print_error(){
     printf("%d:%s\n", errno, strerror(errno));
+}
+
+int add_client_planet(char name[NAMEMAX]){
+    int i = 0;
+    while(i != 8 && client_planets[i].name[0])
+        i++;
+    
+    if(i == 8){
+        printf("planets full\n");
+        return;
+    }
+    //TODO change point to spawn in a planet orbit 
+    Vec3 point;
+    point.x = 1.0;
+    point.y = 0.0;
+    point.z = -1.0;
+
+    memcpy(client_planets[i].name, name, NAMEMAX);
+    client_planets[i].pos = point;
+    client_planets[i].radius = 1.0;
+    client_planets[i].mass = 8.1e19;
+
+    return i;
 }
 
 typedef struct{
@@ -47,29 +59,43 @@ typedef struct{
 } client_thread_arg;
 
 void client_thread(client_thread_arg *args){
-    char buffer[32];
+    char buffer[BUFFERSIZE];
+    char name[NAMEMAX];
+
     printf("reading socket %d\n", args->socket_id);
 
+    //clean buffer
+    for(int i = 0; i < BUFFERSIZE; i++)
+        buffer[i] = '\0';
 
+    //recieve client name
+    recv(args->socket_id, name, sizeof(name), 0);
+    //create planet for new client
+    int index = add_client_planet(name);
 
+    //send map planets
+    write(args->socket_id, server_planets, sizeof(server_planets));
+    //send client planets
+    write(args->socket_id, client_planets, sizeof(client_planets));
+    //send which planet is the players
+    send(args->socket_id, index, sizeof(index), 0);
+    int len;
     do
     {
         //read all data until ewouldblock
         //any other error will close socket
-        int len  = recv(args->socket_id, buffer, sizeof(buffer), 0);
-        int dummy = 10;
+        len = recv(args->socket_id, &client_planets[index], sizeof(client_planets), 0);
         if(len < 0){
-            if(errno != EWOULDBLOCK)
-                printf("recv failed\n");
-
+            print_error();
             break;
         }
-        //connection closed by client
         if(len == 0){
-            printf("closed socket %d\n", args->socket_id);
+            printf("server closed connection\n");
             break;
         }
-        printf("socket %d : %s\n", args->socket_id, buffer);
+
+        send(args->socket_id, &client_planets, sizeof(client_planets), 0);
+        send(args->socket_id, &server_planets, sizeof(server_planets), 0);
     } while(!QUIT);
     
     close(args->socket_id);
@@ -174,8 +200,7 @@ void master_socket_thread(){
 }
 
 int main(int argc, char** argv){
-    for(int i = 0; i < MAXCLIENTS; i++)
-        client_planets[i] = NULL;
+    memset(client_planets, 0, sizeof(client_planets));
 
     Vec3 origin;
     origin.x = 0.0;
@@ -185,20 +210,24 @@ int main(int argc, char** argv){
     Vec3 oglforward;
     oglforward.x = 0.0;
     oglforward.y = 0.0;
-    oglforward.z = 0.0;
+    oglforward.z = -1.0;
 
     Planet sun;
-    sun.name = NULL;
+    memcpy(&sun.name, "Sun", 4);
     sun.pos = origin;
     sun.forward = oglforward;
     sun.vel = 0.0;
     sun.mass = 1.989e30;
+    sun.radius = 6.371;
 
-    server_planets[0] = &sun;
+    server_planets[0] = sun;
 
     pthread_t listener = NULL;
     int error_code = pthread_create(&listener, NULL, master_socket_thread, NULL);
+    
     while(!QUIT){
+
+
         if(getchar() == 'q')
             QUIT = TRUE;
     }

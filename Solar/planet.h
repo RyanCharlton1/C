@@ -4,11 +4,13 @@
 #include "Maths/vec3.h"
 
 typedef struct{
-    const char *name;
+    char name[32];
     Vec3 pos;
     Vec3 forward;
     double vel;
     double mass;
+    //radius in megameters
+    double radius;
 } Planet;
 
 Planet* init_planet(const char *name);

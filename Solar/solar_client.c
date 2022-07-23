@@ -17,17 +17,19 @@
 #include <GLFW/glfw3.h>
 
 #include "Solar/planet.h"
+#include "Solar/solar.h"
 
-#define LOCALHOST "127.0.0.1"
-#define SSPORT 1234
+int QUIT = FALSE;
 
-#define TESTMSG "this is a test\n"
+Planet client_planets[MAXCLIENTS];
+Planet server_planets[SERVERPLANETS];
+int player_index;
 
 void print_error(){
     printf("%d:%s\n", errno, strerror(errno));
 }
 
-void server_connection_thread(){
+void server_connection_thread(char name[NAMEMAX]){
     int server_socket;
     struct sockaddr_in address;
     struct hostent *hostptr;
@@ -36,7 +38,7 @@ void server_connection_thread(){
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(SSPORT);
-    //create 
+    //create ip struct
     hostptr = gethostbyname(LOCALHOST);
     memcpy(&address.sin_addr, hostptr->h_addr, hostptr->h_length);
 
@@ -53,13 +55,54 @@ void server_connection_thread(){
         return -1;
     }
 
-    write(server_socket, TESTMSG, sizeof(TESTMSG));
+    //sends player name 
+    write(server_socket, name, strlen(name) + 1);
+    //receive map planets
+    recv(server_socket, server_planets, sizeof(server_planets), 0);
+    //receive client planets
+    recv(server_socket, client_planets, sizeof(client_planets), 0);
+    //receive index for which planet is players
+    recv(server_socket, player_index, sizeof(player_index), 0);
+    //loop sending player planet and recieving other clients and server data
+    int len;
+    while(!QUIT){
+        send(server_socket, &client_planets[player_index], sizeof(Planet), 0);
+        
+        len = recv(server_socket, &client_planets, sizeof(client_planets), 0);
+        if(len < 0){
+            print_error();
+            break;
+        }
+        if(len == 0){
+            printf("server closed connection\n");
+            break;
+        }
+        
+        len = recv(server_socket, &server_planets, sizeof(server_planets), 0);
+        if(len < 0){
+            print_error();
+            break;
+        }
+        if(len == 0){
+            printf("server closed connection\n");
+            break;
+        }
+    }
 
-    close(server_socket);
+    close(server_socket);  
     pthread_detach(pthread_self());
 }
-
+//args: "palyer name"
 int main(int argc, char **argv){
+
+    //thread will update planet data
+    memset(client_planets, 0, sizeof(client_planets));
+    pthread_t server_connection;
+    pthread_create(&server_connection, NULL, server_connection_thread, argv[1]);
     
+    
+
+    QUIT = TRUE;
+    pthread_join(server_connection, NULL);
     return 0;
 }
