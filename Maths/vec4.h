@@ -2,7 +2,7 @@
 #define VEC4RYAN
 
 typedef struct{
-    double x, y, z, w;
+    float x, y, z, w;
 } Vec4;
 
 Vec4 vec4_add(Vec4 a, Vec4 b);

@@ -2,7 +2,7 @@
 #define VEC3RYAN
 
 typedef struct{
-    double x, y, z;
+    float x, y, z;
 } Vec3;
 
 Vec3 vec3_add(Vec3 a, Vec3 b);

@@ -16,8 +16,14 @@
 #include <glad/include/glad/gl.h>
 #include <GLFW/glfw3.h>
 
+#include "Solar/models/model.h"
 #include "Solar/planet.h"
 #include "Solar/solar.h"
+
+
+#define WIDTH 800
+#define HEIGHT 600
+
 
 int QUIT = FALSE;
 
@@ -37,6 +43,13 @@ void print_server_planets(){
 
 void print_error(){
     printf("%d:%s\n", errno, strerror(errno));
+}
+
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods){
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
+        QUIT = TRUE;
+        glfwSetWindowShouldClose(window, TRUE);
+    }
 }
 
 void server_connection_thread(char name[NAMEMAX]){
@@ -109,15 +122,146 @@ void server_connection_thread(char name[NAMEMAX]){
 }
 //args: "palyer name"
 int main(int argc, char **argv){
-
     //thread will update planet data
     memset(client_planets, 0, sizeof(client_planets));
     pthread_t server_connection;
     pthread_create(&server_connection, NULL, server_connection_thread, argv[1]);
-    
+
+    GLFWwindow *window;
+    int loglen = 0;
+    if(!glfwInit()){
+        QUIT = FALSE;
+        pthread_join(server_connection, NULL);
+        return -1;
+    }
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+
+    window = glfwCreateWindow(WIDTH, HEIGHT, "Solar Client", NULL, NULL);
+    if(!window){
+        glfwTerminate();
+        QUIT = FALSE;
+        pthread_join(server_connection, NULL);
+        return -1;
+    }
+
+    glfwMakeContextCurrent(window);
+    gladLoadGL(glfwGetProcAddress);
+    glfwSwapInterval(1);
+
+    glfwSetKeyCallback(window, key_callback);
+
+    int vert, frag;
+    int prog;
+    vert = glCreateShader(GL_VERTEX_SHADER);
+    frag = glCreateShader(GL_FRAGMENT_SHADER);
+    //open file
+    FILE *vertfile = fopen("shaders/planet.vert", "r");
+    FILE *fragfile = fopen("shaders/planet.frag", "r");
+    //find file lengths
+    fseek(vertfile, 0, SEEK_END);
+    int vertlen = ftell(vertfile);
+    rewind(vertfile);
+
+    fseek(fragfile, 0, SEEK_END);
+    int fraglen = ftell(fragfile);
+    rewind(fragfile);
+    //read files
+    char *vertsrc = malloc(vertlen + 1);
+    char *fragscr = malloc(fraglen + 1);
+
+    vertsrc[vertlen] = '\0';
+    fragscr[fraglen] = '\0';
+
+    fread(vertsrc, vertlen, 1, vertfile);
+    fread(fragscr, fraglen, 1, fragfile);
+    //set shader source
+    glShaderSource(vert, 1, &vertsrc, NULL);
+    glShaderSource(frag, 1, &fragscr, NULL);
+
+    glCompileShader(vert);
+    glCompileShader(frag);
+    //print shader compile info
+    int vertsuccess = 0;
+    int fragsuccess = 0;
+
+    glGetShaderiv(vert, GL_COMPILE_STATUS, &vertsuccess);
+    glGetShaderiv(frag, GL_COMPILE_STATUS, &fragsuccess);
+
+    if(vertsuccess == FALSE){
+        glGetShaderiv(vert, GL_INFO_LOG_LENGTH, &loglen);
+        char *infolog = malloc(loglen + 1);
+        infolog[loglen] = '\0';
+        glGetShaderInfoLog(vert, loglen, &loglen, infolog);
+        printf("%s\n", infolog);
+        free(infolog);
+        QUIT = TRUE;
+        //clear up shader
+        glDeleteShader(vert);
+    }
+
+    if(fragsuccess == FALSE){
+        glGetShaderiv(frag, GL_INFO_LOG_LENGTH, &loglen);
+        char *infolog = malloc(loglen + 1);
+        infolog[loglen] = '\0';
+        glGetShaderInfoLog(frag, loglen, &loglen, infolog);
+        printf("%s\n", infolog);
+        free(infolog);
+        QUIT = TRUE;
+        //clean up shaders
+        glDeleteShader(vert);
+        glDeleteShader(frag);
+    }
+
+    //create program
+    prog = glCreateProgram();
+    //attach shaders
+    glAttachShader(prog, vert);
+    glAttachShader(prog, frag);
+    //link program
+    glLinkProgram(prog);
+    //print link info
+    int linked = FALSE;
+    glGetProgramiv(prog, GL_LINK_STATUS, &linked);
+    if(linked == FALSE){
+        glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &loglen);
+        char *infolog = malloc(loglen + 1);
+        infolog[loglen] = '\0';
+        glGetProgramInfoLog(prog, loglen, &loglen, infolog);
+        printf("%s\n", infolog);
+        free(infolog);
+        QUIT = TRUE;
+        //clean up shaders and program
+        glDeleteShader(vert);
+        glDeleteShader(frag);
+        glDeleteProgram(prog);
+    }
+
+    //detatch post link to avoid memleaks
+    glDetachShader(prog, vert);
+    glDetachShader(prog, frag);
+
+    unsigned int 
+    Vec3 planet_model = load_obj("Model/sphere.obj", )
+
     
 
+    while(!QUIT){
+        glClear(GL_COLOR_BUFFER_BIT);
+
+
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();    
+    }
+    glfwSetWindowShouldClose(window, TRUE);
+    
     //QUIT = TRUE;
     pthread_join(server_connection, NULL);
+    
+    glfwTerminate();
+    free(vertsrc);
+    free(fragscr);
     return 0;
 }

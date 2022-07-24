@@ -11,6 +11,8 @@
         "limits": "c",
         "glad.h": "c",
         "glfw3.h": "c",
-        "planet.h": "c"
+        "planet.h": "c",
+        "stdio.h": "c",
+        "vec3.h": "c"
     }
 }

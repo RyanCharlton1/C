@@ -27,9 +27,11 @@
 				"${workspaceFolder}/Compression/MTF/mtf.c",
 				"${workspaceFolder}/ECC/CRC/crc.c",
 				"${workspaceFolder}/glad/src/glad.c",
+				"`pkg-config --cflags glfw3`",
 				"-o",
 				"${fileDirname}/${fileBasenameNoExtension}.o",
 				"-lm",
+				"`pkg-config --static --libs glfw3`",
 				"-w"
 			],
 			"options": {

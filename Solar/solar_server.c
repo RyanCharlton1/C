@@ -226,7 +226,7 @@ int main(int argc, char** argv){
     int error_code = pthread_create(&listener, NULL, master_socket_thread, NULL);
     
     while(!QUIT){
-
+        
 
         if(getchar() == 'q')
             QUIT = TRUE;
